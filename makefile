@@ -1,15 +1,20 @@
 CC=g++
+FLAGS=-g -Og
 
-all: rt image convert
+all: mt image convert
 
 rt:
-	$(CC) -o rt rt.cpp -O3
+	$(CC) -o rt rt.cpp $(FLAGS)
+
+mt:
+	$(CC) -o mt mt.cpp -pthread $(FLAGS)
 
 image:
-	./rt > image.ppm
+	./mt > image.ppm
+#	./rt > image.ppm
 
 convert:
 	convert image.ppm image.png
 
 clean:
-	rm -f rt image.ppm image.png
+	rm -f rt mt image.ppm image.png

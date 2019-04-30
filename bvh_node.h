@@ -56,7 +56,7 @@ class bvh_node : public solid
 		bvh_node() {}
 		bvh_node(solid **l, int n, float time0, float time1);
 		virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
-		virtual bool bounding_box(float t0, float t1, aabb& box);
+		virtual bool bounding_box(float t0, float t1, aabb& box) const;
 		solid *left;
 		solid *right;
 		aabb box;
@@ -88,7 +88,7 @@ bvh_node::bvh_node(solid **l, int n, float time0, float time1)
 	aabb box_left, box_right;
 
 	if(!left->bounding_box(time0, time1, box_left) || !right->bounding_box(time0, time1, box_right))
-		std:cerr << "No bounding box in bvh_node constructor" << std::endl;
+		std::cerr << "No bounding box in bvh_node constructor" << std::endl;
 
 	box = surrounding_box(box_left, box_right);
 }
@@ -120,7 +120,7 @@ bool bvh_node::hit(const ray& r, float t_min, float t_max, hit_record& rec) cons
 			rec = right_rec;
 			return true;
 		}
-		else return false
+		else return false;
 	}
 	else return false;
 }
