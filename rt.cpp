@@ -14,7 +14,7 @@
 #include "surface_texture.h"
 #include "bvh_node.h"
 
-void ppm_headers(int& nx, int& ny);
+void ppm_headers(int& dimX, int& dimY);
 vec3 color(const ray& r, solid *world, int depth);
 solid_list *random_scene();
 solid_list *two_spheres();
@@ -40,50 +40,31 @@ solid_list *test_scene()
 
 int main()
 {
-	int nx = 400;
-	int ny = 400;
-	int ns = 10000;
+	int dimX = 200;
+	int dimY = 200;
+	int ns = 100;
 
-	/*
-	int nx = 1280;
-	int ny = 720;
-	int ns = 2500;
-	*/
+	ppm_headers(dimX, dimY);
 
-	ppm_headers(nx, ny);
-
-	/*
-	const int world_size = 5;
-	solid *list[world_size];
-
-	list[0] = new sphere(vec3(0, 0, -1), 0.5,		new lambertian(vec3(0.8, 0.3, 0.3)));
-	list[1] = new sphere(vec3(0, -100.5, -1), 100,	new lambertian(vec3(0.8, 0.8, 0.0)));
-	list[2] = new sphere(vec3(1, 0, -1), 0.5,		new metal(vec3(0.8, 0.6, 0.2), 0.0));
-	list[3] = new sphere(vec3(-1, 0, -1), 0.5,		new dielectric(1.5));
-	list[4] = new sphere(vec3(-1, 0, -1), -0.45,	new dielectric(1.5));
-	solid_list *world = new solid_list(list, world_size);
-	*/
-
-	solid_list *world = test_scene();
-
-	vec3 lookfrom(4,4,4);
-	vec3 lookat(0,0,0);
+	solid_list *world = final_scene();
+	vec3 lookfrom(478,278,-800);
+	vec3 lookat(278,278,0);
 	//float dist_to_focus = (lookfrom - lookat).length();
-	float dist_to_focus = 10;
+	float dist_to_focus = 10.0;
 	float aperture = 0.0;
-	float vfov = 45.0;
+	float vfov = 40.0;
 
-	camera cam(lookfrom, lookat, vec3(0,1,0), vfov, float(nx)/float(ny), aperture, dist_to_focus, 0.0, 1.0);
+	camera cam(lookfrom, lookat, vec3(0,1,0), vfov, float(dimX)/float(dimY), aperture, dist_to_focus, 0.0, 1.0);
 
-	for(int j = ny - 1;  j >= 0; j--)
+	for(int j = dimY - 1;  j >= 0; j--)
 	{
-		for(int i = 0; i < nx; i++)
+		for(int i = 0; i < dimX; i++)
 		{
 			vec3 col(0,0,0);
 			for(int s = 0; s < ns; s++)
 			{
-				float u = float(i + drand48()) / float(nx);
-				float v = float(j + drand48()) / float(ny);
+				float u = float(i + drand48()) / float(dimX);
+				float v = float(j + drand48()) / float(dimY);
 
 				ray r = cam.get_ray(u, v);
 				vec3 p = r.point_at_parameter(2.0);
@@ -97,13 +78,18 @@ int main()
 			int ib = int(255.99 * col.b());
 
 			std::cout << ir << " " << ig << " " << ib << "\n";
+
+			int index = i + j*dimX;
+
+			if(index % 10000 == 0)
+				std::cerr << "Rendered pixel " << index << std::endl;
 		}
 	}
 }
 
-void ppm_headers(int& nx, int& ny)
+void ppm_headers(int& dimX, int& dimY)
 {
-	std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+	std::cout << "P3\n" << dimX << " " << dimY << "\n255\n";
 }
 
 vec3 color(const ray& r, solid *world, int depth)
@@ -126,11 +112,6 @@ vec3 color(const ray& r, solid *world, int depth)
 	else
 	{
 		return vec3(0, 0, 0);
-		/*
-		vec3 unit_direction = unit_vector(r.direction());
-		float t = 0.5 * (unit_direction.y() + 1.0);
-		return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
-		*/
 	}
 }
 
@@ -295,12 +276,12 @@ solid_list *final_scene()
 	boundary = new sphere(vec3(0,0,0), 5000, new dielectric(1.5));
 	list[l++] = new constant_medium(boundary, 0.0001, new constant_texture(vec3(1.0, 1.0, 1.0)));
 
-	int nx, ny, nn;
-	unsigned char *tex_data = stbi_load("hmm.png", &nx, &ny, &nn, 0);
-	material *fmat = new lambertian(new image_texture(tex_data, nx, ny));
-
+	/*
+	int dimX, dimY, nn;
+	unsigned char *tex_data = stbi_load("hmm.png", &dimX, &dimY, &nn, 0);
+	material *fmat = new lambertian(new image_texture(tex_data, dimX, dimY));
 	list[l++] = new sphere(vec3(400, 200, 400), 100, fmat);
-
+*/
 	texture *pertext = new noise_texture(0.1);
 
 	list[l++] = new sphere(vec3(220, 280, 300), 80, new lambertian(pertext));
