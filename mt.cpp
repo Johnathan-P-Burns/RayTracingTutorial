@@ -128,7 +128,7 @@ int main()
 	const std::size_t dimX = 800;
 	const std::size_t dimY = 800;
 	const std::size_t dimTotal = dimX * dimY;
-	const std::size_t samples = 10000;
+	const std::size_t samples = 1000;
 	std::size_t cores = std::thread::hardware_concurrency();
 
 	volatile std::atomic<std::size_t> count(0);
@@ -168,6 +168,9 @@ int main()
 					if(index > dimTotal) break;
 
 					image.at(index) = average_color(world, cam, index, dimX, dimY, samples);
+
+					if(index % 10000 == 0)
+						std::cerr << "Rendered pixel " << index << std::endl;
 				}
 			}));
 	}

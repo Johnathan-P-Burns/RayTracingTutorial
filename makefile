@@ -1,5 +1,5 @@
 CC=g++
-FLAGS=-g -Og
+FLAGS=-O3
 
 all: mt image convert
 
