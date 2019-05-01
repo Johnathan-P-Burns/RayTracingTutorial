@@ -18,4 +18,4 @@ convert:
 	#convert image-st.ppm image-st.png
 
 clean:
-	rm -f rt mt image-st.ppm image-st.png image-mt.ppm image-mt.png
+	rm -f rt mt
