@@ -35,14 +35,36 @@ solid_list *color_example()
 solid_list *simple_lighting_and_reflections()
 {
 	int i = 0;
-	solid **list = new solid*[20];
-	list[i++] = new xz_rect(-5, 5, -5, 5, -2, new diffuse_light(new constant_texture(vec3(7,7,7))));
-	list[i++] = new sphere(vec3(0,10,0), 5,   new diffuse_light(new constant_texture(vec3(7,7,7))));
+	solid **list = new solid*[30];
+	diffuse_light *l = new diffuse_light(new constant_texture(vec3(7,7,7)));
+
+	list[i++] = new sphere(vec3(10,0,0),  5, l);
+	list[i++] = new sphere(vec3(-10,0,0), 5, l);
+	list[i++] = new sphere(vec3(0,10,0),  5, l);
+	list[i++] = new sphere(vec3(0,-10,0), 5, l);
+	list[i++] = new sphere(vec3(0,0,10),  5, l);
+	list[i++] = new sphere(vec3(0,0,-10), 5, l);
+
 	list[i++] = new sphere(vec3(0,0,0),  1.0, new metal(vec3(0.1, 0.2, 0.3), 0.0));
-	list[i++] = new sphere(vec3(1,0,0),  0.5, new dielectric(1.5));
-	list[i++] = new sphere(vec3(0,0,1),  0.5, new dielectric(1.5));
-	list[i++] = new sphere(vec3(-1,0,0), 0.5, new dielectric(1.5));
-	list[i++] = new sphere(vec3(0,0,-1), 0.5, new dielectric(1.5));
+
+	dielectric *d = new dielectric(1.5);
+
+	list[i++] = new sphere(vec3(1,0,0),  0.5,  d);
+	list[i++] = new sphere(vec3(-1,0,0), 0.5,  d);
+	list[i++] = new sphere(vec3(0,1,0),  0.5,  d);
+	list[i++] = new sphere(vec3(0,-1,0), 0.5,  d);
+	list[i++] = new sphere(vec3(0,0,1),  0.5,  d);
+	list[i++] = new sphere(vec3(0,0,-1), 0.5,  d);
+
+	list[i++] = new sphere(vec3(1,0,0),  -0.4, d);
+	list[i++] = new sphere(vec3(-1,0,0), -0.4, d);
+	list[i++] = new sphere(vec3(0,1,0),  -0.4, d);
+	list[i++] = new sphere(vec3(0,-1,0), -0.4, d);
+	list[i++] = new sphere(vec3(0,0,1),  -0.4, d);
+	list[i++] = new sphere(vec3(0,0,-1), -0.4, d);
+
+	list[i++] = new sphere(vec3(0,0,0), 2.0, new dielectric(1.333));
+	list[i++] = new sphere(vec3(0,0,0), -1.9, new dielectric(1.333));
 	return new solid_list(list, i);
 }
 

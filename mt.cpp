@@ -15,18 +15,18 @@
 #include "scenes.h"
 
 // Necessary Evils
-const std::size_t dimX = 400;
-const std::size_t dimY = 400;
+const std::size_t dimX = 1000;
+const std::size_t dimY = 1000;
 const std::size_t dimTotal = dimX * dimY;
-const std::size_t samples = 100;
+const std::size_t samples = 10000;
 const vec3 lookfrom(5, 5, 5);
 const vec3 lookat(0, 0, 0);
 //const vec3 lookfrom(478, 278, -800);
 //const vec3 lookat(278, 278, 0);
 const float aperture = 0.0;
 const float dist_to_focus = 10.0;
-const float vfov = 15.0;
-
+const float vfov = 40.0;
+const int MAX_BOUNCES = 100;
 
 vec3 color(const ray& r, solid *world, int depth);
 
@@ -40,7 +40,7 @@ int main()
 	std::vector< vec3 * > image; 
 
 	image.resize(dimTotal);
-	solid_list *world = color_example();
+	solid_list *world = simple_lighting_and_reflections();
 
 	// Split the computation
 	while(cores--)
@@ -80,7 +80,7 @@ int main()
 					image.at(index) = new vec3(r, g, b);
 
 					if(index % 10000 == 0)
-						std::cerr << "Rendered pixel " << index << std::endl;
+						std::cerr  << "Rendered pixel " << index << "\t" << 100 * float(index) / float(dimTotal) << "\% done" << std::endl;
 				}
 			}));
 	}
@@ -114,7 +114,7 @@ vec3 color(const ray& r, solid *world, int depth)
 		ray scattered;
 		vec3 attenuation;
 		vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
-		if(depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+		if(depth < MAX_BOUNCES && rec.mat_ptr->scatter(r, rec, attenuation, scattered))
 		{
 			return emitted + attenuation * color(scattered, world, depth + 1);
 		}
