@@ -40,9 +40,9 @@ solid_list *test_scene()
 
 int main()
 {
-	int dimX = 200;
-	int dimY = 200;
-	int ns = 100;
+	int dimX = 800;
+	int dimY = 800;
+	int ns = 1000;
 
 	ppm_headers(dimX, dimY);
 
@@ -95,7 +95,7 @@ void ppm_headers(int& dimX, int& dimY)
 vec3 color(const ray& r, solid *world, int depth)
 {
 	hit_record rec;
-	if(world->hit(r, 0.001, MAXFLOAT, rec))
+	if(world->hit(r, 0.001, FLT_MAX, rec))
 	{
 		ray scattered;
 		vec3 attenuation;

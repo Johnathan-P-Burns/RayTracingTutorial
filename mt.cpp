@@ -13,6 +13,19 @@
 #include "constant_medium.h"
 #include "texture.h"
 
+const std::size_t dimX = 100;
+const std::size_t dimY = 100;
+const std::size_t dimTotal = dimX * dimY;
+const std::size_t samples = 10000;
+const vec3 lookfrom(4, 4, 4);
+const vec3 lookat(0, 0, 0);
+//const vec3 lookfrom(478, 278, -800);
+//const vec3 lookat(278, 278, 0);
+const float aperture = 0.0;
+const float dist_to_focus = 10.0;
+const float vfov = 40.0;
+
+
 solid_list *final_scene();
 solid_list *test_scene();
 vec3 color(const ray& r, solid *world, int depth);
@@ -20,14 +33,6 @@ vec3 *average_color(solid *world, camera cam, std::size_t index, const std::size
 
 int main()
 {
-	float dist_to_focus, aperture, vfov;
-
-	//const std::size_t dimX = 1920;
-	//const std::size_t dimY = 1080;
-	const std::size_t dimX = 200;
-	const std::size_t dimY = 200;
-	const std::size_t dimTotal = dimX * dimY;
-	const std::size_t samples = 100;
 	std::size_t cores = std::thread::hardware_concurrency();
 
 	volatile std::atomic<std::size_t> count(0);
@@ -36,31 +41,16 @@ int main()
 	std::vector< vec3 * > image; 
 
 	image.resize(dimTotal);
-
-	solid_list *world = final_scene();
-	
-	/*
-	vec3 lookfrom(4,4,4);
-	vec3 lookat(0,0,0);
-	aperture = 0.0;
-	dist_to_focus = (lookfrom - lookat).length();
-	vfov = 45.0;
-	*/
-
-	vec3 lookfrom(478, 278, -800);
-	vec3 lookat(278, 278, 0);
-	aperture = 0.0;
-	dist_to_focus = 10.0;
-	vfov = 40.0;
-
-	camera cam(lookfrom, lookat, vec3(0,1,0), vfov, float(dimX)/float(dimY), aperture, dist_to_focus, 0.0, 1.0);
+	solid_list *world = test_scene();
 
 	// Do the computation
 	while(cores--)
 	{
 		future_vector.emplace_back(
-			std::async([=, &world, &cam, &count, &image]()
+			std::async([=, &count, &image]()
 			{
+
+				camera cam(lookfrom, lookat, vec3(0,1,0), vfov, float(dimX)/float(dimY), aperture, dist_to_focus, 0.0, 1.0);
 				while(1)
 				{
 					std::size_t index = count++;
@@ -106,18 +96,19 @@ int main()
 	}
 
 	// Print the vector
+/*
 	for(int i = 0; i < image.size(); i++)
 	{
 		std::cout << int(image[i]->r()) << " " << int(image[i]->g()) << " " << int(image[i]->b()) << std::endl;
 	}
-	/*
+*/	
 	for(int j = dimY - 1; j >= 0; j--)
 	{
 		for(int i = 0; i < dimX; i++)
 		{
 		std::cout << (int)image[i + dimX * j]->r() << " " << (int)image[i + dimX * j]->g() << " " << (int)image[i + dimX * j]->b() << std::endl;
 		}
-	}*/
+	}
 
 	return 0;
 }
@@ -174,13 +165,15 @@ solid_list *test_scene()
 {
 	int i = 0;
 	solid **list = new solid*[20];
-	list[i++] = new xz_rect(-5, 5, -5, 5, -2, new diffuse_light(new constant_texture(vec3(7,7,7))));
-	list[i++] = new sphere(vec3(0,10,0), 5,   new diffuse_light(new constant_texture(vec3(7,7,7))));
-	list[i++] = new sphere(vec3(0,0,0),  1.0, new metal(vec3(0.1, 0.2, 0.3), 0.0));
-	list[i++] = new sphere(vec3(1,0,0),  0.5, new dielectric(1.5));
-	list[i++] = new sphere(vec3(0,0,1),  0.5, new dielectric(1.5));
-	list[i++] = new sphere(vec3(-1,0,0), 0.5, new dielectric(1.5));
-	list[i++] = new sphere(vec3(0,0,-1), 0.5, new dielectric(1.5));
+	list[i++] = new xz_rect(-5, 5, -5, 5, -4, new diffuse_light(new constant_texture(vec3(7,7,7))));
+	list[i++] = new sphere(vec3(0,25,0), 10,   new diffuse_light(new constant_texture(vec3(7,7,7))));
+	list[i++] = new sphere(vec3(0,0,0), 2.01, new dielectric(1.5));
+	list[i++] = new sphere(vec3(0,0,0), -2.009, new dielectric(1.5));
+	list[i++] = new sphere(vec3(0,0,0),  1.0, new metal(vec3(0.2, 0.2, 0.4), 0.0));
+	list[i++] = new sphere(vec3(1,0,0),  0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
+	list[i++] = new sphere(vec3(0,0,1),  0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
+	list[i++] = new sphere(vec3(-1,0,0), 0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
+	list[i++] = new sphere(vec3(0,0,-1), 0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
 	return new solid_list(list, i);
 }
 
@@ -189,7 +182,7 @@ solid_list *test_scene()
 vec3 color(const ray& r, solid *world, int depth)
 {
 	hit_record rec;
-	if(world->hit(r, 0.001, MAXFLOAT, rec))
+	if(world->hit(r, 0.001, FLT_MAX, rec))
 	{
 		ray scattered;
 		vec3 attenuation;
