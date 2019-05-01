@@ -6,6 +6,30 @@
 #include "rect.h"
 #include "constant_medium.h"
 
+solid_list *prismatic()
+{
+	int i = 0;
+	solid **list = new solid*[1000];
+
+	constant_texture *ct = new constant_texture(vec3(7,7,7));
+	list[i++] = new sphere(vec3(500, 0, 0), 100, new diffuse_light(ct));
+	list[i++] = new sphere(vec3(0, 500, 0), 100, new diffuse_light(ct));
+	list[i++] = new sphere(vec3(0, 0, 500), 100, new diffuse_light(ct));
+	list[i++] = new sphere(vec3(-500, 0, 0), 100, new diffuse_light(ct));
+	list[i++] = new sphere(vec3(0, -500, 0), 100, new diffuse_light(ct));
+	list[i++] = new sphere(vec3(0, 0, -500), 100, new diffuse_light(ct));
+
+	dielectric *d = new dielectric(1.5);
+
+	for(float j = 250.0; j > 0.0; j -= 5.0)
+	{
+		list[i++] = new sphere(vec3(0,0,0), j, d);
+		list[i++] = new sphere(vec3(0,0,0), 0.1 - j, d);
+	}
+
+	return new solid_list(list, i);
+}
+
 solid_list *color_example()
 {
 	int i, j;

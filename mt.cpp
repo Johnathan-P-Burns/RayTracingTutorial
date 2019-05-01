@@ -15,11 +15,12 @@
 #include "scenes.h"
 
 // Necessary Evils
-const std::size_t dimX = 1000;
-const std::size_t dimY = 1000;
+const std::size_t dimX = 200;
+const std::size_t dimY = 200;
 const std::size_t dimTotal = dimX * dimY;
-const std::size_t samples = 10000;
-const vec3 lookfrom(5, 5, 5);
+const std::size_t reportingValue = dimTotal / 100;
+const std::size_t samples = 1000;
+const vec3 lookfrom(200,400,200);
 const vec3 lookat(0, 0, 0);
 //const vec3 lookfrom(478, 278, -800);
 //const vec3 lookat(278, 278, 0);
@@ -40,7 +41,7 @@ int main()
 	std::vector< vec3 * > image; 
 
 	image.resize(dimTotal);
-	solid_list *world = simple_lighting_and_reflections();
+	solid_list *world = prismatic();
 
 	// Split the computation
 	while(cores--)
@@ -79,7 +80,7 @@ int main()
 
 					image.at(index) = new vec3(r, g, b);
 
-					if(index % 10000 == 0)
+					if(index % reportingValue == 0)
 						std::cerr  << "Rendered pixel " << index << "\t" << 100 * float(index) / float(dimTotal) << "\% done" << std::endl;
 				}
 			}));
