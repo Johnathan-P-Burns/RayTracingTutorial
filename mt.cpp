@@ -13,23 +13,24 @@
 #include "constant_medium.h"
 #include "texture.h"
 
-const std::size_t dimX = 100;
-const std::size_t dimY = 100;
+// Necessary Evils
+const std::size_t dimX = 1000;
+const std::size_t dimY = 1000;
 const std::size_t dimTotal = dimX * dimY;
 const std::size_t samples = 10000;
-const vec3 lookfrom(4, 4, 4);
+const vec3 lookfrom(5, 5, 5);
 const vec3 lookat(0, 0, 0);
 //const vec3 lookfrom(478, 278, -800);
 //const vec3 lookat(278, 278, 0);
 const float aperture = 0.0;
 const float dist_to_focus = 10.0;
-const float vfov = 40.0;
+const float vfov = 15.0;
 
 
 solid_list *final_scene();
 solid_list *test_scene();
+solid_list *random_scene();
 vec3 color(const ray& r, solid *world, int depth);
-vec3 *average_color(solid *world, camera cam, std::size_t index, const std::size_t& dimX, const std::size_t& dimY, const std::size_t& samples);
 
 int main()
 {
@@ -43,7 +44,7 @@ int main()
 	image.resize(dimTotal);
 	solid_list *world = test_scene();
 
-	// Do the computation
+	// Split the computation
 	while(cores--)
 	{
 		future_vector.emplace_back(
@@ -96,12 +97,6 @@ int main()
 	}
 
 	// Print the vector
-/*
-	for(int i = 0; i < image.size(); i++)
-	{
-		std::cout << int(image[i]->r()) << " " << int(image[i]->g()) << " " << int(image[i]->b()) << std::endl;
-	}
-*/	
 	for(int j = dimY - 1; j >= 0; j--)
 	{
 		for(int i = 0; i < dimX; i++)
@@ -163,18 +158,28 @@ solid_list *final_scene()
 
 solid_list *test_scene()
 {
-	int i = 0;
-	solid **list = new solid*[20];
-	list[i++] = new xz_rect(-5, 5, -5, 5, -4, new diffuse_light(new constant_texture(vec3(7,7,7))));
-	list[i++] = new sphere(vec3(0,25,0), 10,   new diffuse_light(new constant_texture(vec3(7,7,7))));
+	int i, j;
+	const int MAX_OBJECTS = 100;
+
+   	i = 0;
+	j = 0;
+
+	solid **list = new solid*[MAX_OBJECTS];
+	metal *met = new metal(vec3(0.2, 0.2, 0.4), 0.001);
+
+	list[i++] = new xy_rect(-5, 5, -5, 5, -5, new diffuse_light(new constant_texture(vec3(7,0,0))));
+	list[i++] = new flip_normals(new yz_rect(-5, 5, -5, 5, -5, new diffuse_light(new constant_texture(vec3(0,7,0)))));
+	list[i++] = new xz_rect(-5, 5, -5, 5, -5, new diffuse_light(new constant_texture(vec3(0,0,7))));
+	//list[i++] = new flip_normals(new xz_rect(-5, 5, -5, 5, -5, new diffuse_light(new constant_texture(vec3(0,0,7)))));
+	list[i++] = new flip_normals(new sphere(vec3(0,0,0), 50, met));
 	list[i++] = new sphere(vec3(0,0,0), 2.01, new dielectric(1.5));
 	list[i++] = new sphere(vec3(0,0,0), -2.009, new dielectric(1.5));
-	list[i++] = new sphere(vec3(0,0,0),  1.0, new metal(vec3(0.2, 0.2, 0.4), 0.0));
-	list[i++] = new sphere(vec3(1,0,0),  0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
-	list[i++] = new sphere(vec3(0,0,1),  0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
-	list[i++] = new sphere(vec3(-1,0,0), 0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
-	list[i++] = new sphere(vec3(0,0,-1), 0.5, new metal(vec3(0.2, 0.2, 0.4), 0.0));
-	return new solid_list(list, i);
+	list[i++] = new sphere(vec3(0,0,0), 2.01, new dielectric(1.5));
+	list[i++] = new sphere(vec3(0,0,0), -2.009, new dielectric(1.5));
+
+	list[i++] = new sphere(vec3(0,0,0),  1.0, met);
+
+	return new solid_list(list, i + j);
 }
 
 
@@ -200,8 +205,4 @@ vec3 color(const ray& r, solid *world, int depth)
 	{
 		return vec3(0, 0, 0);
 	}
-}
-
-vec3 *average_color(solid *world, camera cam, std::size_t index, const std::size_t& dimX, const std::size_t& dimY, const std::size_t& samples)
-{
 }
