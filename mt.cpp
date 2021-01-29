@@ -15,19 +15,17 @@
 #include "scenes.h"
 
 // Necessary Evils
-const std::size_t dimX = 200;
-const std::size_t dimY = 200;
+const std::size_t dimX = 800;
+const std::size_t dimY = 800;
 const std::size_t dimTotal = dimX * dimY;
 const std::size_t reportingValue = dimTotal / 100;
-const std::size_t samples = 1000;
-const vec3 lookfrom(200,400,200);
+const std::size_t samples = 200;
+const vec3 lookfrom(0, 0, 45);
 const vec3 lookat(0, 0, 0);
-//const vec3 lookfrom(478, 278, -800);
-//const vec3 lookat(278, 278, 0);
-const float aperture = 0.0;
+const float aperture = 0.1;
 const float dist_to_focus = 10.0;
 const float vfov = 40.0;
-const int MAX_BOUNCES = 100;
+const int MAX_BOUNCES = 50;
 
 vec3 color(const ray& r, solid *world, int depth);
 
@@ -41,7 +39,7 @@ int main()
 	std::vector< vec3 * > image; 
 
 	image.resize(dimTotal);
-	solid_list *world = prismatic();
+	solid_list *world = color_example();
 
 	// Split the computation
 	while(cores--)
